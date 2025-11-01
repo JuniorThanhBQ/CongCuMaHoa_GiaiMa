@@ -28,14 +28,18 @@ int SolveEuclide(int x, int a) {
 		b = (b + 26) % 26;
 	return b;
 }
-int AffineEncoding(int x, int k1, int k2) {
-	return (k1 * x + k2) % 26;
-}
-int AffineDecoding(int x, int k1, int k2) {
-	int output = SolveEuclide(26, k1) * (x - k2) % 26;
-	if (output >= 0)
-		return output;
-	return 26 + output;
+int AffineDecoding_Encoding(int x, int k1, int k2, bool type) {
+	int output = 0;
+	if (type) {
+		output = SolveEuclide(26, k1) * (x - k2) % 26;
+
+		if (output >= 0)
+			return output;
+
+		return 26 + output;
+	}
+	else
+		return (k1 * x + k2) % 26;
 }
 string SolveAffine() {
 	int k1, k2;
@@ -44,47 +48,34 @@ string SolveAffine() {
 
 	cout << "Input word: ";
 	getline(cin, word);
-	cout << "\nType of Affine (1 for decoding, 0 for encoding), k1, k2: ";
+	cout << "\nType of Affine (0 for decoding, 1 for encoding), k1, k2: ";
 	cin >> decoding >> k1 >> k2;
 
 	string output = "";
-	if (decoding) {
-		for (int i = 0; i < word.size(); i++) {
-			if (word[i] != ' ')
-				output += char(AffineDecoding(word[i] - 65, k1, k2) + 65);
-			else
-				output += ' ';
-		}
-	}
-	else {
-		for (int i = 0; i < word.size(); i++) {
-			if (word[i] != ' ')
-				output += char(AffineEncoding(word[i] - 65, k1, k2) + 65);
-			else
-				output += ' ';
-		}
+	for (int i = 0; i < word.size(); i++) {
+		if (word[i] != ' ')
+			output += char(AffineDecoding_Encoding(word[i] - 65, k1, k2, decoding) + 65);
+		else
+			output += ' ';
 	}
 
-	return output + "\0";
+
+	return output;
 }
 
 int mod(int a, int m) {
 	return (a % m + m) % m;
 }
 
-string CeasarDecoding(string x, int k) {
+string CeasarDecoding_Encoding(string x, int k, bool type) {
 	string output = "";
 	for (int i = 0; i < x.size(); i++) {
-			output += mod((int(x[i]) - 65 - k),26) + 65;
+		if(type)
+			output += mod((int(x[i]) - 65 - k), 26) + 65;
+		else
+			output += mod((int(x[i]) - 65 + k), 26) + 65;
 	}
-	return output + "\0";
-}
-string CeasarEncoding(string x, int k) {
-	string output = "";
-	for (int i = 0; i < x.size(); i++) {
-		output += mod((int(x[i]) - 65 + k), 26) + 65;
-	}
-	return output + "\0";
+	return output;
 }
 string SolveCeasar() {
 	int k = 0;
@@ -94,67 +85,48 @@ string SolveCeasar() {
 	cout << "Input word: ";
 	cin.ignore();
 	getline(cin, word);
-	cout << "\nType of Ceasar (1 for decoding, 0 for encoding) and k: ";
+	cout << "\nType of Ceasar (0 for decoding, 1 for encoding) and k: ";
 	cin >> decoding >> k;
 
-	if (decoding) {
-		word = CeasarDecoding(word,k);
-	}
-	else {
-		word = CeasarEncoding(word,k);
-	}
-	return word;
+	return CeasarDecoding_Encoding(word, k, decoding);
 }
 
-string VigenereDecoding(string x, string k) {
+string VigenereDecoding_Encoding(string x, string k, bool type) {
 	string output = "";
 	int countCurrentK = 0;
+
 	for (int i = 0; i < x.size(); i++) {
-		output += mod((int(x[i]) - int(k[countCurrentK]) - 65 * 2), 26) + 65;
-		countCurrentK++;
+		if(type)
+			output += mod((int(x[i]) - int(k[countCurrentK++]) - 65 * 2), 26) + 65;
+		else
+			output += mod((int(x[i]) + int(k[countCurrentK++]) - 65 * 2), 26) + 65;
+
 		if (countCurrentK >= k.size())
 			countCurrentK = 0;
 	}
-	return output + "\0";
-}
-string VigenereEncoding(string x, string k) {
-	string output = "";
-	int countCurrentK = 0;
-	for (int i = 0; i < x.size(); i++) {
-		output += mod((int(x[i]) + int(k[countCurrentK]) - 65 * 2), 26) + 65;
-		countCurrentK++;
-		if (countCurrentK >= k.size())
-			countCurrentK = 0;
-	}
-	return output + "\0";
+	return output;
 }
 string SolveVigenere() {
-	string k = "";
+	string k = "", word = "";
 	bool decoding = true;
-	string word = "";
 
 	cout << "Input word: ";
 	cin.ignore();
 	getline(cin, word);
-	cout << "\nType of Vigenere (1 for decoding, 0 for encoding) and k: ";
+
+	cout << "\nType of Vigenere (0 for decoding, 1 for encoding) and k: ";
 	cin >> decoding;
 	cin.ignore();
 	getline(cin, k);
 
-	if (decoding) {
-		word = VigenereDecoding(word, k);
-	}
-	else {
-		word = VigenereEncoding(word, k);
-	}
-	return word;
+	return VigenereDecoding_Encoding(word, k, decoding);
 }
 
-void Initialize_PlayFairTable(string k, int (&arr)[50][50]) {
+/*void Initialize_PlayFairTable(string k, int(&arr)[50][50]) {
 	
 }
 
-/*string PlayfairDecoding(string x, int arr[50][50]) {
+string PlayfairDecoding(string x, int arr[50][50]) {
 	string output = "";
 
 	return output + "\0";
@@ -188,7 +160,11 @@ string SolvePlayFair() {
 		word = PlayfairEncoding(word, arr);
 	}
 	return word;
-}*/
+}
+
+
+*/
+
 
 const string listTemlate = "\
 =========== Menu tool ==========\n\
