@@ -9,3 +9,5 @@
   + Hill encryption and decryption
   + Diffie-Hellman encryption and decryption
   + Detailed presentation of decryption steps
+ 
+1/11/2025: Updated some logic in function
