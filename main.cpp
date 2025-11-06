@@ -142,35 +142,35 @@ void updateK(int (&arr)[2][2], int delta) {
 		}
 }
 
-//string HillDecoding_Encoding(string x, int(&arr)[2][2], bool type) {
-//	string output = "";
-//	if(!type)
-//		updateK(arr, DetKDelta(arr));
-//
-//	for (int i = 0; i < x.size(); i += 2) {
-//			output += mod(((int(x[i]) - 65) * arr[0][0] + (int(x[i + 1]) - 65) * arr[0][1]), 26) + 65;
-//			output += mod(((int(x[i]) - 65) * arr[1][0] + (int(x[i + 1]) - 65) * arr[1][1]), 26) + 65;
-//	}
-//	return output;
-//}
-//
-//string SolveHill() {
-//	int k[2][2];
-//	string word = "";
-//	bool decoding = true;
-//
-//	cout << "Input word: ";
-//	cin.ignore();
-//	getline(cin, word);
-//
-//	cout << "\nType of Hill (0 for decoding, 1 for encoding) and k1, k2, k3, k4: ";
-//	cin >> decoding;
-//	for (int i = 0; i < 2; i++)
-//		for (int j = 0; j < 2; j++)
-//			cin >> k[i][j];
-//
-//	return HillDecoding_Encoding(word, k, decoding);
-//}
+string HillDecoding_Encoding(string x, int(&arr)[2][2], bool type) {
+	string output = "";
+	if(!type)
+		updateK(arr, DetKDelta(arr));
+
+	for (int i = 0; i < x.size(); i += 2) {
+			output += mod(((int(x[i]) - 65) * arr[0][0] + (int(x[i + 1]) - 65) * arr[1][0]), 26) + 65;
+			output += mod(((int(x[i]) - 65) * arr[0][1] + (int(x[i + 1]) - 65) * arr[1][1]), 26) + 65;
+	}
+	return output;
+}
+
+string SolveHill() {
+	int k[2][2];
+	string word = "";
+	bool decoding = true;
+
+	cout << "Input word: ";
+	cin.ignore();
+	getline(cin, word);
+
+	cout << "\nType of Hill (0 for decoding, 1 for encoding) and k1, k2, k3, k4: ";
+	cin >> decoding;
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 2; j++)
+			cin >> k[i][j];
+
+	return HillDecoding_Encoding(word, k, decoding);
+}
 
 /*void Initialize_PlayFairTable(string k, int(&arr)[50][50]) {
 	
@@ -265,7 +265,7 @@ void ToolsMenu() {
 			}
 			case '6':
 			{
-				/*cout << SolveHill() << endl;*/
+				cout << SolveHill() << endl;
 				break;
 			}
 			case '7':
