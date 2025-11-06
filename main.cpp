@@ -1,5 +1,6 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
 int SolveX(int &x1, int x2) {
@@ -171,50 +172,203 @@ string SolveHill() {
 
 	return HillDecoding_Encoding(word, k, decoding);
 }
+void Initialize_PlayFairTable(string k, int(&arr)[50][50]) {
+    string key = "";
+    vector<bool> seen(26, false);
+    for (char ch : k) {
+        if (!isalpha((unsigned char)ch)) continue;
+        ch = tolower((unsigned char)ch);
+        if (ch == 'j') ch = 'i';
+        int idx = ch - 'a';
+        if (!seen[idx]) {
+            if (ch == 'i') {
+                if (!seen['i' - 'a']) seen['i' - 'a'] = true;
+            }
+            else {
+                seen[idx] = true;
+            }
+            key.push_back(ch);
+        }
+    }
 
-/*void Initialize_PlayFairTable(string k, int(&arr)[50][50]) {
-	
+     for (char c = 'a'; c <= 'z'; ++c) {
+        if (c == 'j') continue; 
+        if (!seen[c - 'a']) {
+            key.push_back(c);
+            seen[c - 'a'] = true;
+        }
+    }
+
+    for (int i = 0; i < 50; ++i) for (int j = 0; j < 50; ++j) arr[i][j] = -1;
+    int r = 0, c = 0;
+    for (char ch : key) {
+        arr[r][c] = ch - 'a';
+        c++;
+        if (c == 5) { c = 0; r++; }
+    }
 }
 
-string PlayfairDecoding(string x, int arr[50][50]) {
-	string output = "";
-
-	return output + "\0";
+static void findPosition(int val, int(&arr)[50][50], int& r, int& c) {
+    for (int i = 0; i < 5; ++i) for (int j = 0; j < 5; ++j) {
+        if (arr[i][j] == val) { r = i; c = j; return; }
+    }
+    r = c = -1;
 }
-string PlayfairEncoding(string x, int arr[50][50]) {
-	string output = "";
-	
-	return output + "\0";
+
+string preprocessPlainForEncoding(string s) {
+  
+    string t;
+    for (char ch : s) {
+        if (!isalpha((unsigned char)ch)) continue;
+        ch = tolower((unsigned char)ch);
+        if (ch == 'j') ch = 'i';
+        t.push_back(ch);
+    }
+  
+    string out;
+    for (size_t i = 0; i < t.size(); ) {
+        char a = t[i];
+        char b = (i + 1 < t.size()) ? t[i + 1] : '\0';
+        if (b == '\0') {
+            out.push_back(a);
+            out.push_back('x');
+            i += 1;
+        }
+        else if (a == b) {
+            out.push_back(a);
+            out.push_back('x');
+            i += 1;
+        }
+        else {
+            out.push_back(a);
+            out.push_back(b);
+            i += 2;
+        }
+    }
+    return out;
+}
+
+string PlayfairEncoding(string x, int(&arr)[50][50]) {
+    string cleaned = preprocessPlainForEncoding(x);
+    string output;
+    for (size_t i = 0; i < cleaned.size(); i += 2) {
+        char a = cleaned[i], b = cleaned[i + 1];
+        int va = a - 'a', vb = b - 'a';
+        int ra, ca, rb, cb;
+        findPosition(va, arr, ra, ca);
+        findPosition(vb, arr, rb, cb);
+        if (ra == rb) {
+         
+            int na = arr[ra][(ca + 1) % 5];
+            int nb = arr[rb][(cb + 1) % 5];
+            output.push_back(char(na + 'a'));
+            output.push_back(char(nb + 'a'));
+        }
+        else if (ca == cb) {
+           
+            int na = arr[(ra + 1) % 5][ca];
+            int nb = arr[(rb + 1) % 5][cb];
+            output.push_back(char(na + 'a'));
+            output.push_back(char(nb + 'a'));
+        }
+        else {
+   
+            int na = arr[ra][cb];
+            int nb = arr[rb][ca];
+            output.push_back(char(na + 'a'));
+            output.push_back(char(nb + 'a'));
+        }
+    }
+    return output;
+}
+
+string PlayfairDecoding(string x, int(&arr)[50][50]) {
+
+    string t;
+    for (char ch : x) {
+        if (!isalpha((unsigned char)ch)) continue;
+        ch = tolower((unsigned char)ch);
+        if (ch == 'j') ch = 'i';
+        t.push_back(ch);
+    }
+
+    if (t.size() % 2 != 0) t.push_back('x');
+
+    string output;
+    for (size_t i = 0; i < t.size(); i += 2) {
+        char a = t[i], b = t[i + 1];
+        int va = a - 'a', vb = b - 'a';
+        int ra, ca, rb, cb;
+        findPosition(va, arr, ra, ca);
+        findPosition(vb, arr, rb, cb);
+        if (ra == rb) {
+
+            int na = arr[ra][(ca + 5 - 1) % 5];
+            int nb = arr[rb][(cb + 5 - 1) % 5];
+            output.push_back(char(na + 'a'));
+            output.push_back(char(nb + 'a'));
+        }
+        else if (ca == cb) {
+
+            int na = arr[(ra + 5 - 1) % 5][ca];
+            int nb = arr[(rb + 5 - 1) % 5][cb];
+            output.push_back(char(na + 'a'));
+            output.push_back(char(nb + 'a'));
+        }
+        else {
+       
+            int na = arr[ra][cb];
+            int nb = arr[rb][ca];
+            output.push_back(char(na + 'a'));
+            output.push_back(char(nb + 'a'));
+        }
+    }
+
+
+    string cleaned;
+    for (size_t i = 0; i < output.size(); ++i) {
+        if (i + 2 < output.size() && output[i] == output[i + 2] && output[i + 1] == 'x') {
+            cleaned.push_back(output[i]);
+        }
+        else {
+            cleaned.push_back(output[i]);
+        }
+    }
+
+
+    if (!cleaned.empty() && cleaned.back() == 'x') {
+        cleaned.pop_back();
+    }
+
+    return cleaned;
 }
 
 string SolvePlayFair() {
-	string k = "";
-	bool decoding = true;
-	string word = "";
+    string k = "";
+    bool decoding = true;
+    string word = "";
 
-	cout << "Input word: ";
-	cin.ignore();
-	getline(cin, word);
-	cout << "\nType of Playfair (1 for decoding, 0 for encoding) and k: ";
-	cin >> decoding;
-	cin.ignore();
-	getline(cin, k);
+    cout << "Input word: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, word);
+    cout << "\nType of Playfair (1 for decoding, 0 for encoding) and k: ";
+    int modeInt = 1;
+    cin >> modeInt;
+    decoding = (modeInt != 0);
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, k);
 
-	int arr[50][50];
-	Initialize_PlayFairTable(k, arr);
+    int arr[50][50];
+    Initialize_PlayFairTable(k, arr);
 
-	if (decoding) {
-		word = PlayfairDecoding(word, arr);
-	}
-	else {
-		word = PlayfairEncoding(word, arr);
-	}
-	return word;
+    if (decoding) {
+        word = PlayfairDecoding(word, arr);
+    }
+    else {
+        word = PlayfairEncoding(word, arr);
+    }
+    return word;
 }
-
-
-*/
-
 
 const string listTemlate = "\
 =========== Menu tool ==========\n\
@@ -248,7 +402,7 @@ void ToolsMenu() {
 			}
 			case '3':
 			{
-				cout << "Not available" << endl;
+				cout << SolvePlayFair() << endl;
 				break;
 			}
 			case '4':
